@@ -1,153 +1,212 @@
 /*
 AI-Driven Jenkins Shared Library Pipeline
-- Optimized for Ubuntu (PEP 668 compliant)
-- Clean Maven logging
-- Automated AI failure analysis integration
+Analyzes repositories and generates CI/CD pipelines using AI.
 */
 
 def call() {
+
     pipeline {
+
         agent any
 
         stages {
-            // 1. Clone application repository
+
+            // Clone application repository
             stage('Checkout') {
                 steps {
                     git url: 'https://github.com/dkasha14/JavaSpringBoot.git', branch: 'master'
                 }
             }
 
-            // 2. Detect application technology stack
+            // Detect application language based on common build files
             stage('Detect Application Type') {
                 steps {
                     script {
+
                         if (fileExists('requirements.txt')) {
                             env.APP_TYPE = "python"
-                        } else if (fileExists('pom.xml')) {
+                        }
+                        else if (fileExists('pom.xml')) {
                             env.APP_TYPE = "java"
-                        } else if (fileExists('package.json')) {
+                        }
+                        else if (fileExists('package.json')) {
                             env.APP_TYPE = "node"
-                        } else {
+                        }
+                        else {
                             env.APP_TYPE = "unknown"
                         }
+
                         echo "Detected application type: ${env.APP_TYPE}"
                     }
                 }
             }
 
-            // 3. Setup isolated environment for AI tools
+            // Install AI engine dependencies inside isolated Python virtual environment
             stage('Install AI Dependencies') {
                 steps {
                     sh '''
-                    # Locate Shared Library path
                     LIB=$(ls -d $WORKSPACE@libs/* | head -1)
-                    
-                    # Create venv to bypass Ubuntu "externally-managed-environment" error
+
                     python3 -m venv ai_venv
+
                     ai_venv/bin/pip install --upgrade pip
+
                     ai_venv/bin/pip install -r $LIB/requirements.txt
                     '''
                 }
             }
 
-            // 4. AI-Powered Repository Analysis
+            // Run AI repository analyzer to detect languages, frameworks, and infrastructure
             stage('AI Repository Analysis') {
                 steps {
+
                     withCredentials([string(credentialsId: 'groq-api-key', variable: 'GROQ_API_KEY')]) {
+
                         sh '''
                         LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+
                         export PYTHONPATH=$LIB
+
                         ai_venv/bin/python $LIB/ai_engine/repo_analyzer.py
                         '''
                     }
                 }
             }
 
-            // 5. AI-Powered Pipeline Generation
+            // Generate dynamic CI/CD pipeline using LLM
             stage('AI Pipeline Generation') {
                 steps {
+
                     withCredentials([string(credentialsId: 'groq-api-key', variable: 'GROQ_API_KEY')]) {
+
                         sh '''
                         LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+
                         export PYTHONPATH=$LIB
+
                         ai_venv/bin/python $LIB/ai_engine/pipeline_generator.py
                         '''
                     }
                 }
             }
 
-            // 6. Build stage with optimized logging
+            // Build application depending on detected technology stack
             stage('Build') {
                 steps {
+
                     script {
+
                         if (env.APP_TYPE == "python") {
+
                             sh 'ai_venv/bin/pip install -r requirements.txt'
-                        } else if (env.APP_TYPE == "java") {
-                            // Clean logs: Batch mode + no ANSI colors
+
+                        }
+                        else if (env.APP_TYPE == "java") {
+
                             sh 'mvn -B -Dstyle.color=never clean package'
-                        } else if (env.APP_TYPE == "node") {
+
+                        }
+                        else if (env.APP_TYPE == "node") {
+
                             sh '''
                             npm install --silent
                             npm audit --audit-level=high --json > audit-report.json || true
                             '''
-                        } else {
-                            echo "No supported build file found"
+
                         }
+                        else {
+
+                            echo "No supported build file found"
+
+                        }
+
                     }
                 }
             }
 
-            // 7. Execute generated script with error handling
+            // Execute the AI generated CI/CD pipeline safely
             stage('Execute AI Generated Pipeline') {
                 steps {
                     sh '''
-                    # Ensure test tools are in the venv
+
+                    # Install required test and security tools
                     ai_venv/bin/pip install pytest bandit
+
+                    # Add virtual environment binaries to PATH
                     export PATH="$WORKSPACE/ai_venv/bin:$PATH"
 
                     if [ -f generated_pipeline.sh ]; then
+
                         chmod +x generated_pipeline.sh
-                        
-                        # Security Scan (ignoring failures so pipeline continues)
+
+                        # Run security scan excluding virtual environments
                         bandit -r . -x ai_venv,venv,.venv -ll || true
 
-                        # Run pipeline & capture logs for AI analyzer
-                        # PIPESTATUS[0] captures the script exit code, not 'tee'
+                        # Execute generated pipeline and capture logs
                         ./generated_pipeline.sh 2>&1 | tee failure.log
+
                         EXIT_CODE=${PIPESTATUS[0]}
 
-                        # Exit Code 5 = No tests found (Pytest). We treat this as success.
+                        # Ignore pytest exit code when no tests exist
                         if [ "$EXIT_CODE" = "5" ]; then
-                            echo "No tests collected, but build succeeded."
+                            echo "No tests found — continuing pipeline"
                             exit 0
                         fi
 
                         exit $EXIT_CODE
+
                     else
-                        echo "Error: generated_pipeline.sh not found."
+
+                        echo "No generated pipeline found"
                         exit 1
+
                     fi
                     '''
                 }
             }
+
+            // Placeholder test stage
+            stage('Test') {
+                steps {
+                    echo "Running tests..."
+                }
+            }
+
+            // Placeholder deployment stage
+            stage('Deploy') {
+                steps {
+                    echo "Deploy stage..."
+                }
+            }
+
         }
 
-        // 8. Auto-Analysis on failure
+        // Run AI log analyzer if pipeline fails
         post {
+
             failure {
-                echo "Pipeline failed. Starting AI diagnostics..."
+
+                echo "Pipeline failed. Running AI failure analysis."
+
                 withCredentials([string(credentialsId: 'groq-api-key', variable: 'GROQ_API_KEY')]) {
+
                     sh '''
                     LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+
                     export PYTHONPATH=$LIB
+
                     if [ -f failure.log ]; then
                         ai_venv/bin/python $LIB/ai_engine/log_analyzer.py failure.log
                     else
-                        echo "Failure analysis skipped: failure.log not found"
+                        echo "failure.log not found"
                     fi
                     '''
                 }
+
             }
+
         }
+
     }
+
 }

@@ -11,14 +11,22 @@ def call() {
 
         stages {
 
-            // Clone application repository
+            /*
+            ------------------------------------------------
+            Checkout Application Repository
+            ------------------------------------------------
+            */
             stage('Checkout') {
                 steps {
                     git url: 'https://github.com/dkasha14/JavaSpringBoot.git', branch: 'master'
                 }
             }
 
-            // Detect application language
+            /*
+            ------------------------------------------------
+            Detect Application Type
+            ------------------------------------------------
+            */
             stage('Detect Application Type') {
                 steps {
                     script {
@@ -41,7 +49,11 @@ def call() {
                 }
             }
 
-            // Install AI dependencies inside Python virtual environment
+            /*
+            ------------------------------------------------
+            Install AI Engine Dependencies
+            ------------------------------------------------
+            */
             stage('Install AI Dependencies') {
                 steps {
                     sh '''
@@ -56,7 +68,11 @@ def call() {
                 }
             }
 
-            // Run AI repository analysis
+            /*
+            ------------------------------------------------
+            Run AI Repository Analyzer
+            ------------------------------------------------
+            */
             stage('AI Repository Analysis') {
                 steps {
 
@@ -73,7 +89,11 @@ def call() {
                 }
             }
 
-            // Generate pipeline using AI
+            /*
+            ------------------------------------------------
+            Generate Pipeline using AI
+            ------------------------------------------------
+            */
             stage('AI Pipeline Generation') {
                 steps {
 
@@ -90,7 +110,11 @@ def call() {
                 }
             }
 
-            // Build application based on detected type
+            /*
+            ------------------------------------------------
+            Build Application
+            ------------------------------------------------
+            */
             stage('Build') {
                 steps {
 
@@ -118,7 +142,7 @@ def call() {
 
                         else {
 
-                            echo "No supported build file found"
+                            echo "No supported build configuration found"
 
                         }
 
@@ -126,11 +150,17 @@ def call() {
                 }
             }
 
-            // Execute AI generated CI/CD pipeline
+            /*
+            ------------------------------------------------
+            Execute AI Generated Pipeline
+            ------------------------------------------------
+            */
             stage('Execute AI Generated Pipeline') {
                 steps {
+
                     sh '''
-                    #!/bin/bash
+
+                    set +e
 
                     ai_venv/bin/pip install pytest
 
@@ -142,10 +172,10 @@ def call() {
 
                         ./generated_pipeline.sh 2>&1 | tee failure.log
 
-                        EXIT_CODE=${PIPESTATUS[0]}
+                        EXIT_CODE=$?
 
-                        if [ "$EXIT_CODE" = "5" ]; then
-                            echo "No tests found — continuing pipeline"
+                        if [ "$EXIT_CODE" -eq 5 ]; then
+                            echo "No tests found. Continuing pipeline."
                             exit 0
                         fi
 
@@ -153,7 +183,7 @@ def call() {
 
                     else
 
-                        echo "No generated pipeline found"
+                        echo "generated_pipeline.sh not found"
                         exit 1
 
                     fi
@@ -161,23 +191,35 @@ def call() {
                 }
             }
 
-            // Placeholder test stage
+            /*
+            ------------------------------------------------
+            Test Stage (Placeholder)
+            ------------------------------------------------
+            */
             stage('Test') {
                 steps {
-                    echo "Running tests..."
+                    echo "Test stage placeholder"
                 }
             }
 
-            // Placeholder deployment stage
+            /*
+            ------------------------------------------------
+            Deploy Stage (Placeholder)
+            ------------------------------------------------
+            */
             stage('Deploy') {
                 steps {
-                    echo "Deploy stage..."
+                    echo "Deploy stage placeholder"
                 }
             }
 
         }
 
-        // Run AI failure analyzer
+        /*
+        ------------------------------------------------
+        AI Failure Analysis
+        ------------------------------------------------
+        */
         post {
 
             failure {

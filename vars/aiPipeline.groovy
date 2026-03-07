@@ -1,4 +1,4 @@
-```groovy
+
 def call() {
 
     pipeline {
@@ -147,4 +147,3 @@ def call() {
     }
 
 }
-```

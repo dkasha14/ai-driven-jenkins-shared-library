@@ -1,9 +1,8 @@
 # Environment variables
 .env
 
-# AI runtime files
-analysis.json
-generated_pipeline.sh
+
+
 
 # Python
 __pycache__/

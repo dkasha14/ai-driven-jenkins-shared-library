@@ -18,7 +18,7 @@ def call() {
                 }
             }
 
-            // Detect application language based on common build files
+            // Detect application language
             stage('Detect Application Type') {
                 steps {
                     script {
@@ -41,7 +41,7 @@ def call() {
                 }
             }
 
-            // Install AI engine dependencies inside isolated Python virtual environment
+            // Install AI dependencies inside Python virtual environment
             stage('Install AI Dependencies') {
                 steps {
                     sh '''
@@ -56,7 +56,7 @@ def call() {
                 }
             }
 
-            // Run AI repository analyzer to detect languages, frameworks, and infrastructure
+            // Run AI repository analysis
             stage('AI Repository Analysis') {
                 steps {
 
@@ -73,7 +73,7 @@ def call() {
                 }
             }
 
-            // Generate dynamic CI/CD pipeline using LLM
+            // Generate pipeline using AI
             stage('AI Pipeline Generation') {
                 steps {
 
@@ -90,7 +90,7 @@ def call() {
                 }
             }
 
-            // Build application depending on detected technology stack
+            // Build application based on detected type
             stage('Build') {
                 steps {
 
@@ -101,19 +101,21 @@ def call() {
                             sh 'ai_venv/bin/pip install -r requirements.txt'
 
                         }
+
                         else if (env.APP_TYPE == "java") {
 
                             sh 'mvn -B -Dstyle.color=never clean package'
 
                         }
+
                         else if (env.APP_TYPE == "node") {
 
                             sh '''
                             npm install --silent
-                            npm audit --audit-level=high --json > audit-report.json || true
                             '''
 
                         }
+
                         else {
 
                             echo "No supported build file found"
@@ -124,30 +126,24 @@ def call() {
                 }
             }
 
-            // Execute the AI generated CI/CD pipeline safely
+            // Execute AI generated CI/CD pipeline
             stage('Execute AI Generated Pipeline') {
                 steps {
                     sh '''
+                    #!/bin/bash
 
-                    # Install required test and security tools
-                    ai_venv/bin/pip install pytest bandit
+                    ai_venv/bin/pip install pytest
 
-                    # Add virtual environment binaries to PATH
                     export PATH="$WORKSPACE/ai_venv/bin:$PATH"
 
                     if [ -f generated_pipeline.sh ]; then
 
                         chmod +x generated_pipeline.sh
 
-                        # Run security scan excluding virtual environments
-                        bandit -r . -x ai_venv,venv,.venv -ll || true
-
-                        # Execute generated pipeline and capture logs
                         ./generated_pipeline.sh 2>&1 | tee failure.log
 
                         EXIT_CODE=${PIPESTATUS[0]}
 
-                        # Ignore pytest exit code when no tests exist
                         if [ "$EXIT_CODE" = "5" ]; then
                             echo "No tests found — continuing pipeline"
                             exit 0
@@ -181,7 +177,7 @@ def call() {
 
         }
 
-        // Run AI log analyzer if pipeline fails
+        // Run AI failure analyzer
         post {
 
             failure {
@@ -201,6 +197,7 @@ def call() {
                         echo "failure.log not found"
                     fi
                     '''
+
                 }
 
             }

@@ -1,24 +1,42 @@
 import json
 
+
 def decide_pipeline(analysis):
 
     stages = []
 
-    language = analysis.get("language", "")
+    project_type = analysis.get("project_type", "")
 
-    if "Python" in language:
+    docker_enabled = analysis.get("docker", False)
+    terraform_enabled = analysis.get("terraform", False)
+    kubernetes_enabled = analysis.get("kubernetes", False)
+
+    # Language based stages
+    if project_type == "python":
         stages.append("install_dependencies")
         stages.append("run_tests")
+        stages.append("security_scan")
 
-    if "Java" in language:
+    elif project_type == "java":
         stages.append("maven_build")
+        stages.append("security_scan")
 
-    if "Node" in language:
+    elif project_type == "node":
         stages.append("npm_build")
+        stages.append("security_scan")
 
-    stages.append("docker_build")
-    stages.append("docker_push")
-    stages.append("kubernetes_deploy")
+    # Docker stages
+    if docker_enabled:
+        stages.append("docker_build")
+        stages.append("docker_push")
+
+    # Terraform stages
+    if terraform_enabled:
+        stages.append("terraform_apply")
+
+    # Kubernetes stages
+    if kubernetes_enabled:
+        stages.append("kubernetes_deploy")
 
     return stages
 

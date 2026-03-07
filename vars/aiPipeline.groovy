@@ -1,4 +1,3 @@
-
 def call() {
 
     pipeline {
@@ -41,8 +40,11 @@ def call() {
                         sh '''
                         LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
-                        python3 -m pip install --upgrade pip
-                        pip3 install -r $LIB/requirements.txt
+                        python3 -m venv ai_venv
+                        source ai_venv/bin/activate
+
+                        pip install --upgrade pip
+                        pip install -r $LIB/requirements.txt
                         '''
                     }
                 }
@@ -55,7 +57,7 @@ def call() {
                         LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
                         export PYTHONPATH=$LIB
-                        python3 $LIB/ai_engine/repo_analyzer.py
+                        ai_venv/bin/python $LIB/ai_engine/repo_analyzer.py
                         '''
                     }
                 }
@@ -68,7 +70,7 @@ def call() {
                         LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
                         export PYTHONPATH=$LIB
-                        python3 $LIB/ai_engine/pipeline_generator.py
+                        ai_venv/bin/python $LIB/ai_engine/pipeline_generator.py
                         '''
                     }
                 }
@@ -79,10 +81,17 @@ def call() {
                     script {
 
                         if (env.APP_TYPE == "python") {
-                            sh 'pip3 install -r requirements.txt'
+
+                            sh '''
+                            source ai_venv/bin/activate
+                            pip install -r requirements.txt
+                            '''
+
                         } 
                         else if (env.APP_TYPE == "java") {
+
                             sh 'mvn clean package'
+
                         } 
                         else if (env.APP_TYPE == "node") {
 
@@ -94,6 +103,7 @@ def call() {
                             echo "Node dependency security scan completed"
                         } 
                         else {
+
                             echo "No supported build file found"
                         }
 
@@ -138,7 +148,7 @@ def call() {
                 LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
                 export PYTHONPATH=$LIB
-                python3 $LIB/ai_engine/log_analyzer.py failure.log || true
+                ai_venv/bin/python $LIB/ai_engine/log_analyzer.py failure.log || true
                 '''
             }
 

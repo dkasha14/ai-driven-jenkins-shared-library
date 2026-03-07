@@ -41,7 +41,7 @@ def call() {
                 }
             }
 
-            // Install AI dependencies in isolated virtual environment
+            // Install AI engine dependencies inside isolated Python virtual environment
             stage('Install AI Dependencies') {
                 steps {
                     sh '''
@@ -54,7 +54,7 @@ def call() {
                 }
             }
 
-            // Run AI repository analyzer
+            // Run AI repository analyzer to detect languages, frameworks, and infrastructure
             stage('AI Repository Analysis') {
                 steps {
 
@@ -71,7 +71,7 @@ def call() {
                 }
             }
 
-            // Generate CI/CD pipeline using AI
+            // Generate dynamic CI/CD pipeline using the LLM
             stage('AI Pipeline Generation') {
                 steps {
 
@@ -88,7 +88,7 @@ def call() {
                 }
             }
 
-            // Build application depending on detected stack
+            // Build application depending on detected technology stack
             stage('Build') {
                 steps {
 
@@ -99,7 +99,7 @@ def call() {
                         }
 
                         else if (env.APP_TYPE == "java") {
-                            sh 'mvn clean package'
+                            sh 'mvn -B -Dstyle.color=never clean package'
                         }
 
                         else if (env.APP_TYPE == "node") {
@@ -117,18 +117,21 @@ def call() {
                 }
             }
 
-            // Execute the AI generated CI/CD pipeline safely
+            // Execute the AI generated CI/CD pipeline
             stage('Execute AI Generated Pipeline') {
                 steps {
                     sh '''
 
                     ai_venv/bin/pip install pytest bandit
 
+                    export PATH=$WORKSPACE/ai_venv/bin:$PATH
+
                     if [ -f generated_pipeline.sh ]; then
 
                         chmod +x generated_pipeline.sh
 
-                        export PATH=$WORKSPACE/ai_venv/bin:$PATH
+                        # Run security scan properly excluding virtual environments
+                        bandit -r . -x ai_venv,venv,.venv -ll || true
 
                         ./generated_pipeline.sh
                         EXIT_CODE=$?
@@ -164,7 +167,7 @@ def call() {
 
         }
 
-        // Run AI log analyzer on failure
+        // Run AI log analyzer if pipeline fails
         post {
 
             failure {

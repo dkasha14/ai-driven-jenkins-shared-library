@@ -1,3 +1,57 @@
-@Library('ai-driven-jenkins-shared-library') _
+pipeline {
 
-aiPipeline()
+    agent any
+
+    stages {
+
+        stage('Clone Repo') {
+            steps {
+                git 'https://github.com/dkasha14/ai-driven-jenkins-shared-library.git'
+            }
+        }
+
+        stage('Install Python Dependencies') {
+            steps {
+                sh '''
+                python -m pip install --upgrade pip
+                pip install -r requirements.txt
+                '''
+            }
+        }
+
+        stage('AI Repo Analysis') {
+            steps {
+                sh '''
+                python -m ai_engine.repo_analyzer
+                '''
+            }
+        }
+
+        stage('AI Pipeline Decision') {
+            steps {
+                sh '''
+                python -m ai_engine.pipeline_brain
+                '''
+            }
+        }
+
+        stage('Generate AI Pipeline') {
+            steps {
+                sh '''
+                python -m ai_engine.pipeline_generator
+                '''
+            }
+        }
+
+        stage('Execute Generated Pipeline') {
+            steps {
+                sh '''
+                chmod +x generated_pipeline.sh
+                ./generated_pipeline.sh
+                '''
+            }
+        }
+
+    }
+
+}

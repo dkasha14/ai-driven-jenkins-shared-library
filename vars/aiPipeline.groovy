@@ -1,3 +1,4 @@
+```groovy
 def call() {
 
     pipeline {
@@ -18,13 +19,13 @@ def call() {
 
                         if (fileExists('requirements.txt')) {
                             env.APP_TYPE = "python"
-                        }
+                        } 
                         else if (fileExists('pom.xml')) {
                             env.APP_TYPE = "java"
-                        }
+                        } 
                         else if (fileExists('package.json')) {
                             env.APP_TYPE = "node"
-                        }
+                        } 
                         else {
                             env.APP_TYPE = "unknown"
                         }
@@ -34,15 +35,26 @@ def call() {
                 }
             }
 
+            stage('Install AI Dependencies') {
+                steps {
+                    script {
+                        sh '''
+                        LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+
+                        python3 -m pip install --upgrade pip
+                        pip3 install -r $LIB/requirements.txt
+                        '''
+                    }
+                }
+            }
+
             stage('AI Repository Analysis') {
                 steps {
                     script {
-
                         sh '''
                         LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
                         export PYTHONPATH=$LIB
-
                         python3 $LIB/ai_engine/repo_analyzer.py
                         '''
                     }
@@ -52,12 +64,10 @@ def call() {
             stage('AI Pipeline Generation') {
                 steps {
                     script {
-
                         sh '''
                         LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
                         export PYTHONPATH=$LIB
-
                         python3 $LIB/ai_engine/pipeline_generator.py
                         '''
                     }
@@ -70,12 +80,10 @@ def call() {
 
                         if (env.APP_TYPE == "python") {
                             sh 'pip3 install -r requirements.txt'
-                        }
-
+                        } 
                         else if (env.APP_TYPE == "java") {
                             sh 'mvn clean package'
-                        }
-
+                        } 
                         else if (env.APP_TYPE == "node") {
 
                             sh '''
@@ -84,8 +92,7 @@ def call() {
                             '''
 
                             echo "Node dependency security scan completed"
-                        }
-
+                        } 
                         else {
                             echo "No supported build file found"
                         }
@@ -131,10 +138,13 @@ def call() {
                 LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
                 export PYTHONPATH=$LIB
-
                 python3 $LIB/ai_engine/log_analyzer.py failure.log || true
                 '''
             }
+
         }
+
     }
+
 }
+```

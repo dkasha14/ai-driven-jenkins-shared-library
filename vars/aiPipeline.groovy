@@ -4,6 +4,10 @@ def call() {
 
         agent any
 
+        environment {
+            GROQ_API_KEY = credentials('groq-api-key')
+        }
+
         stages {
 
             stage('Checkout') {
@@ -30,6 +34,7 @@ def call() {
                         }
 
                         echo "Detected application type: ${env.APP_TYPE}"
+
                     }
                 }
             }
@@ -46,6 +51,7 @@ def call() {
                         ai_venv/bin/pip install --upgrade pip
                         ai_venv/bin/pip install -r $LIB/requirements.txt
                         '''
+
                     }
                 }
             }
@@ -61,6 +67,7 @@ def call() {
 
                         ai_venv/bin/python $LIB/ai_engine/repo_analyzer.py
                         '''
+
                     }
                 }
             }
@@ -76,6 +83,7 @@ def call() {
 
                         ai_venv/bin/python $LIB/ai_engine/pipeline_generator.py
                         '''
+
                     }
                 }
             }
@@ -106,11 +114,13 @@ def call() {
                             '''
 
                             echo "Node dependency security scan completed"
+
                         }
 
                         else {
 
                             echo "No supported build file found"
+
                         }
 
                     }
@@ -128,6 +138,7 @@ def call() {
                         echo "No generated pipeline found"
                     fi
                     '''
+
                 }
             }
 
@@ -156,7 +167,11 @@ def call() {
 
                 export PYTHONPATH=$LIB
 
-                ai_venv/bin/python $LIB/ai_engine/log_analyzer.py failure.log || true
+                if [ -f failure.log ]; then
+                    ai_venv/bin/python $LIB/ai_engine/log_analyzer.py failure.log
+                else
+                    echo "failure.log not found"
+                fi
                 '''
 
             }

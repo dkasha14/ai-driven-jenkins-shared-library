@@ -18,13 +18,13 @@ def call() {
 
                         if (fileExists('requirements.txt')) {
                             env.APP_TYPE = "python"
-                        } 
+                        }
                         else if (fileExists('pom.xml')) {
                             env.APP_TYPE = "java"
-                        } 
+                        }
                         else if (fileExists('package.json')) {
                             env.APP_TYPE = "node"
-                        } 
+                        }
                         else {
                             env.APP_TYPE = "unknown"
                         }
@@ -37,14 +37,14 @@ def call() {
             stage('Install AI Dependencies') {
                 steps {
                     script {
+
                         sh '''
                         LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
                         python3 -m venv ai_venv
-                        source ai_venv/bin/activate
 
-                        pip install --upgrade pip
-                        pip install -r $LIB/requirements.txt
+                        ai_venv/bin/pip install --upgrade pip
+                        ai_venv/bin/pip install -r $LIB/requirements.txt
                         '''
                     }
                 }
@@ -53,10 +53,12 @@ def call() {
             stage('AI Repository Analysis') {
                 steps {
                     script {
+
                         sh '''
                         LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
                         export PYTHONPATH=$LIB
+
                         ai_venv/bin/python $LIB/ai_engine/repo_analyzer.py
                         '''
                     }
@@ -66,10 +68,12 @@ def call() {
             stage('AI Pipeline Generation') {
                 steps {
                     script {
+
                         sh '''
                         LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
                         export PYTHONPATH=$LIB
+
                         ai_venv/bin/python $LIB/ai_engine/pipeline_generator.py
                         '''
                     }
@@ -83,16 +87,17 @@ def call() {
                         if (env.APP_TYPE == "python") {
 
                             sh '''
-                            source ai_venv/bin/activate
-                            pip install -r requirements.txt
+                            ai_venv/bin/pip install -r requirements.txt
                             '''
 
-                        } 
+                        }
+
                         else if (env.APP_TYPE == "java") {
 
                             sh 'mvn clean package'
 
-                        } 
+                        }
+
                         else if (env.APP_TYPE == "node") {
 
                             sh '''
@@ -101,7 +106,8 @@ def call() {
                             '''
 
                             echo "Node dependency security scan completed"
-                        } 
+                        }
+
                         else {
 
                             echo "No supported build file found"
@@ -113,6 +119,7 @@ def call() {
 
             stage('Execute AI Generated Pipeline') {
                 steps {
+
                     sh '''
                     if [ -f generated_pipeline.sh ]; then
                         chmod +x generated_pipeline.sh
@@ -148,8 +155,10 @@ def call() {
                 LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
                 export PYTHONPATH=$LIB
+
                 ai_venv/bin/python $LIB/ai_engine/log_analyzer.py failure.log || true
                 '''
+
             }
 
         }

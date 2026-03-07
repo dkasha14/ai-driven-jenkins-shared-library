@@ -1,0 +1,16 @@
+{
+  "Language": [
+    "Python",
+    "Groovy"
+  ],
+  "Framework": "Unknown",
+  "Build tool": "Unknown",
+  "Test tool": "Pytest or Unittest",
+  "Deployment": "Unknown",
+  "docker": true,
+  "terraform": false,
+  "kubernetes": false,
+  "ansible": false,
+  "helm": false,
+  "dotnet": false
+}

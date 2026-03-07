@@ -9,10 +9,10 @@ def call() {
             stage('Checkout') {
                 steps {
                     // Java example repository
-                    // git url: 'https://github.com/dkasha14/JavaSpringBoot.git', branch: 'master'
+                     git url: 'https://github.com/dkasha14/JavaSpringBoot.git', branch: 'master'
 
                     // Node.js example repository
-                    git url: 'https://github.com/dkasha14/nodeJsApplication.git', branch: 'master'
+                    //git url: 'https://github.com/dkasha14/nodeJsApplication.git', branch: 'master'
                 }
             }
 

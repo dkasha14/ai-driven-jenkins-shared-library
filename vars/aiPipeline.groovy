@@ -1,122 +1,190 @@
-import json
-import logging
+/*
+AI-Driven Jenkins Shared Library Pipeline
+Analyzes repositories and generates CI/CD pipelines using AI.
+*/
 
-from ai_engine.llm_client import ask_llm
-from ai_engine.pipeline_brain import decide_pipeline
+def call() {
 
+    pipeline {
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
+        agent any
 
+        stages {
 
-# Map stage names to real executable commands
-STAGE_COMMAND_MAP = {
-    "install_dependencies": "pip install -r requirements.txt || true",
-    "run_tests": "pytest || true",
-    "security_scan": "bandit -r . || true",
-    "maven_build": "mvn clean package",
-    "npm_build": "npm install",
-    "docker_build": "docker build -t ai-devops-app:latest .",
-    "docker_push": "docker push ai-devops-app:latest",
-    "kubernetes_deploy": "kubectl apply -f k8s/ || true",
-    "terraform_apply": "terraform init && terraform apply -auto-approve",
-    "ansible_deploy": "ansible-playbook deploy.yml"
+            // Clone application repository
+            stage('Checkout') {
+                steps {
+                    git url: 'https://github.com/dkasha14/JavaSpringBoot.git', branch: 'master'
+                }
+            }
+
+            // Detect application language
+            stage('Detect Application Type') {
+                steps {
+                    script {
+
+                        if (fileExists('requirements.txt')) {
+                            env.APP_TYPE = "python"
+                        } 
+                        else if (fileExists('pom.xml')) {
+                            env.APP_TYPE = "java"
+                        } 
+                        else if (fileExists('package.json')) {
+                            env.APP_TYPE = "node"
+                        } 
+                        else {
+                            env.APP_TYPE = "unknown"
+                        }
+
+                        echo "Detected application type: ${env.APP_TYPE}"
+                    }
+                }
+            }
+
+            // Install AI dependencies in virtual environment
+            stage('Install AI Dependencies') {
+                steps {
+                    sh '''
+                    LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+
+                    python3 -m venv ai_venv
+                    ai_venv/bin/pip install --upgrade pip
+                    ai_venv/bin/pip install -r $LIB/requirements.txt
+                    '''
+                }
+            }
+
+            // Run repository analysis using AI engine
+            stage('AI Repository Analysis') {
+                steps {
+
+                    withCredentials([string(credentialsId: 'groq-api-key', variable: 'GROQ_API_KEY')]) {
+
+                        sh '''
+                        LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+
+                        export PYTHONPATH=$LIB
+
+                        ai_venv/bin/python $LIB/ai_engine/repo_analyzer.py
+                        '''
+
+                    }
+                }
+            }
+
+            // Generate dynamic CI/CD pipeline
+            stage('AI Pipeline Generation') {
+                steps {
+
+                    withCredentials([string(credentialsId: 'groq-api-key', variable: 'GROQ_API_KEY')]) {
+
+                        sh '''
+                        LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+
+                        export PYTHONPATH=$LIB
+
+                        ai_venv/bin/python $LIB/ai_engine/pipeline_generator.py
+                        '''
+
+                    }
+                }
+            }
+
+            // Build application
+            stage('Build') {
+                steps {
+
+                    script {
+
+                        if (env.APP_TYPE == "python") {
+                            sh 'ai_venv/bin/pip install -r requirements.txt'
+                        }
+
+                        else if (env.APP_TYPE == "java") {
+                            sh 'mvn clean package'
+                        }
+
+                        else if (env.APP_TYPE == "node") {
+                            sh '''
+                            npm install --silent
+                            npm audit --audit-level=high --json > audit-report.json || true
+                            '''
+                        }
+
+                        else {
+                            echo "No supported build file found"
+                        }
+
+                    }
+                }
+            }
+
+            // Execute AI generated pipeline
+            stage('Execute AI Generated Pipeline') {
+                steps {
+                    sh '''
+
+                    ai_venv/bin/pip install pytest bandit
+
+                    if [ -f generated_pipeline.sh ]; then
+
+                        chmod +x generated_pipeline.sh
+
+                        export PATH=$WORKSPACE/ai_venv/bin:$PATH
+
+                        ./generated_pipeline.sh
+
+                    else
+                        echo "No generated pipeline found"
+                        exit 1
+                    fi
+                    '''
+                }
+            }
+
+            // Test placeholder stage
+            stage('Test') {
+                steps {
+                    echo "Running tests..."
+                }
+            }
+
+            // Deployment placeholder stage
+            stage('Deploy') {
+                steps {
+                    echo "Deploy stage..."
+                }
+            }
+
+        }
+
+        // Run AI log analysis if pipeline fails
+        post {
+
+            failure {
+
+                echo "Pipeline failed. Running AI failure analysis."
+
+                withCredentials([string(credentialsId: 'groq-api-key', variable: 'GROQ_API_KEY')]) {
+
+                    sh '''
+                    LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+
+                    export PYTHONPATH=$LIB
+
+                    if [ -f failure.log ]; then
+                        ai_venv/bin/python $LIB/ai_engine/log_analyzer.py failure.log
+                    else
+                        echo "failure.log not found"
+                    fi
+                    '''
+
+                }
+
+            }
+
+        }
+
+    }
+
 }
-
-
-def clean_commands(commands: str) -> str:
-    """Remove markdown formatting returned by the LLM."""
-    commands = commands.replace("```bash", "")
-    commands = commands.replace("```", "")
-    return commands.strip()
-
-
-def normalize_commands(commands: str) -> str:
-    """Replace stage names with real commands if AI returns them."""
-    lines = commands.split("\n")
-    fixed_lines = []
-
-    for line in lines:
-        stripped = line.strip()
-
-        if stripped in STAGE_COMMAND_MAP:
-            fixed_lines.append(STAGE_COMMAND_MAP[stripped])
-        else:
-            fixed_lines.append(line)
-
-    return "\n".join(fixed_lines)
-
-
-def load_analysis() -> dict:
-    """Load repository analysis file produced by repo analyzer."""
-    with open("analysis.json", "r") as f:
-        return json.load(f)
-
-
-def build_prompt(analysis: dict, stages: list) -> str:
-    """Create the AI prompt used to generate the pipeline."""
-    return f"""
-You are a senior DevOps engineer.
-
-Repository analysis:
-{json.dumps(analysis, indent=2)}
-
-Pipeline stages:
-{stages}
-
-Generate a CI/CD pipeline as pure bash commands.
-
-Rules:
-- Output ONLY executable bash commands
-- Do NOT output stage names
-- Convert stage names into real commands
-
-Example:
-install_dependencies -> pip install -r requirements.txt
-run_tests -> pytest
-security_scan -> bandit -r .
-maven_build -> mvn clean package
-
-Return bash commands only.
-"""
-
-
-def write_pipeline(commands: str):
-    """Write final pipeline script to disk."""
-    with open("generated_pipeline.sh", "w") as f:
-        f.write("#!/bin/bash\n\n")
-        f.write("set -e\n\n")
-        f.write(commands + "\n")
-
-    logging.info("Pipeline script written to generated_pipeline.sh")
-
-
-def generate_pipeline():
-    """Main pipeline generation workflow."""
-
-    logging.info("Loading repository analysis")
-    analysis = load_analysis()
-
-    logging.info("Deciding pipeline stages")
-    stages = decide_pipeline(analysis)
-
-    logging.info("Building AI prompt")
-    prompt = build_prompt(analysis, stages)
-
-    logging.info("Requesting pipeline from LLM")
-    response = ask_llm(prompt)
-
-    commands = clean_commands(response)
-
-    # 🔧 THIS IS THE FIX
-    commands = normalize_commands(commands)
-
-    write_pipeline(commands)
-
-    logging.info("Pipeline generation completed")
-
-
-if __name__ == "__main__":
-    generate_pipeline()

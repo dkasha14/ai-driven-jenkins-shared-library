@@ -4,40 +4,27 @@ def call() {
 
         agent any
 
-        environment {
-            LIB_PATH = "${WORKSPACE}@libs"
-        }
-
         stages {
 
             stage('Checkout') {
                 steps {
-
-                    // Java example repository
                     git url: 'https://github.com/dkasha14/JavaSpringBoot.git', branch: 'master'
-
-                    // Node example
-                    // git url: 'https://github.com/dkasha14/nodeJsApplication.git', branch: 'master'
                 }
             }
 
             stage('Detect Application Type') {
                 steps {
-
                     script {
 
                         if (fileExists('requirements.txt')) {
                             env.APP_TYPE = "python"
                         }
-
                         else if (fileExists('pom.xml')) {
                             env.APP_TYPE = "java"
                         }
-
                         else if (fileExists('package.json')) {
                             env.APP_TYPE = "node"
                         }
-
                         else {
                             env.APP_TYPE = "unknown"
                         }
@@ -49,40 +36,43 @@ def call() {
 
             stage('AI Repository Analysis') {
                 steps {
-
                     script {
 
-                        sh """
-                        python3 ${LIB_PATH}/*/ai_engine/repo_analyzer.py
-                        """
+                        sh '''
+                        LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+
+                        export PYTHONPATH=$LIB
+
+                        python3 $LIB/ai_engine/repo_analyzer.py
+                        '''
                     }
                 }
             }
 
             stage('AI Pipeline Generation') {
                 steps {
-
                     script {
 
-                        sh """
-                        python3 ${LIB_PATH}/*/ai_engine/pipeline_generator.py
-                        """
+                        sh '''
+                        LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+
+                        export PYTHONPATH=$LIB
+
+                        python3 $LIB/ai_engine/pipeline_generator.py
+                        '''
                     }
                 }
             }
 
             stage('Build') {
                 steps {
-
                     script {
 
                         if (env.APP_TYPE == "python") {
-
                             sh 'pip3 install -r requirements.txt'
                         }
 
                         else if (env.APP_TYPE == "java") {
-
                             sh 'mvn clean package'
                         }
 
@@ -97,7 +87,6 @@ def call() {
                         }
 
                         else {
-
                             echo "No supported build file found"
                         }
 
@@ -107,18 +96,14 @@ def call() {
 
             stage('Execute AI Generated Pipeline') {
                 steps {
-
-                    script {
-
-                        sh '''
-                        if [ -f generated_pipeline.sh ]; then
-                            chmod +x generated_pipeline.sh
-                            ./generated_pipeline.sh
-                        else
-                            echo "No generated pipeline found"
-                        fi
-                        '''
-                    }
+                    sh '''
+                    if [ -f generated_pipeline.sh ]; then
+                        chmod +x generated_pipeline.sh
+                        ./generated_pipeline.sh
+                    else
+                        echo "No generated pipeline found"
+                    fi
+                    '''
                 }
             }
 
@@ -142,9 +127,13 @@ def call() {
 
                 echo "Pipeline failed. Running AI failure analysis."
 
-                sh """
-                python3 ${LIB_PATH}/*/ai_engine/log_analyzer.py failure.log || true
-                """
+                sh '''
+                LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+
+                export PYTHONPATH=$LIB
+
+                python3 $LIB/ai_engine/log_analyzer.py failure.log || true
+                '''
             }
         }
     }

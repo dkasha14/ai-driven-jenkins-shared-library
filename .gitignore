@@ -17,3 +17,5 @@ env/
 __pycache__/
 *.pyc
 .env
+analysis.json
+generated_pipeline.sh

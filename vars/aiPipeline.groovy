@@ -9,10 +9,10 @@ def call() {
             stage('Checkout') {
                 steps {
                     // Java example repository
-                     git url: 'https://github.com/dkasha14/JavaSpringBoot.git', branch: 'master'
+                    git url: 'https://github.com/dkasha14/JavaSpringBoot.git', branch: 'master'
 
                     // Node.js example repository
-                    //git url: 'https://github.com/dkasha14/nodeJsApplication.git', branch: 'master'
+                    // git url: 'https://github.com/dkasha14/nodeJsApplication.git', branch: 'master'
                 }
             }
 
@@ -35,6 +35,18 @@ def call() {
 
                         echo "Detected application type: ${env.APP_TYPE}"
                     }
+                }
+            }
+
+            stage('AI Repository Analysis') {
+                steps {
+                    sh 'python3 -m ai_engine.repo_analyzer'
+                }
+            }
+
+            stage('AI Pipeline Generation') {
+                steps {
+                    sh 'python3 -m ai_engine.pipeline_generator'
                 }
             }
 
@@ -66,6 +78,13 @@ def call() {
                 }
             }
 
+            stage('Execute AI Generated Pipeline') {
+                steps {
+                    sh 'chmod +x generated_pipeline.sh'
+                    sh './generated_pipeline.sh'
+                }
+            }
+
             stage('Test') {
                 steps {
                     echo "Running tests..."
@@ -79,5 +98,18 @@ def call() {
             }
 
         }
+
+        post {
+
+            failure {
+
+                echo "Pipeline failed. Running AI failure analysis."
+
+                sh 'python3 -m ai_engine.log_analyzer failure.log || true'
+
+            }
+
+        }
+
     }
 }

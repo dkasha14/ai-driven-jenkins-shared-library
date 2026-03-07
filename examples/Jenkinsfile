@@ -4,13 +4,13 @@ pipeline {
 
     stages {
 
-        stage('Clone Repo') {
+        stage('Clone Repository') {
             steps {
                 git 'https://github.com/dkasha14/ai-driven-jenkins-shared-library.git'
             }
         }
 
-        stage('Install Python Dependencies') {
+        stage('Setup Python Environment') {
             steps {
                 sh '''
                 python -m pip install --upgrade pip
@@ -19,27 +19,21 @@ pipeline {
             }
         }
 
-        stage('AI Repo Analysis') {
+        stage('Analyze Repository') {
             steps {
-                sh '''
-                python -m ai_engine.repo_analyzer
-                '''
+                sh 'python -m ai_engine.repo_analyzer'
             }
         }
 
-        stage('AI Pipeline Decision') {
+        stage('Decide Pipeline Stages') {
             steps {
-                sh '''
-                python -m ai_engine.pipeline_brain
-                '''
+                sh 'python -m ai_engine.pipeline_brain'
             }
         }
 
-        stage('Generate AI Pipeline') {
+        stage('Generate CI/CD Pipeline') {
             steps {
-                sh '''
-                python -m ai_engine.pipeline_generator
-                '''
+                sh 'python -m ai_engine.pipeline_generator'
             }
         }
 

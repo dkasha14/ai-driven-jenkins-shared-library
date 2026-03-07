@@ -10,6 +10,12 @@ def call() {
 
         stages {
 
+            stage('Check Env') {
+                steps {
+                    sh 'echo GROQ key environment loaded'
+                }
+            }
+
             stage('Checkout') {
                 steps {
                     git url: 'https://github.com/dkasha14/JavaSpringBoot.git', branch: 'master'
@@ -34,57 +40,43 @@ def call() {
                         }
 
                         echo "Detected application type: ${env.APP_TYPE}"
-
                     }
                 }
             }
 
             stage('Install AI Dependencies') {
                 steps {
-                    script {
+                    sh '''
+                    LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
-                        sh '''
-                        LIB=$(ls -d $WORKSPACE@libs/* | head -1)
-
-                        python3 -m venv ai_venv
-
-                        ai_venv/bin/pip install --upgrade pip
-                        ai_venv/bin/pip install -r $LIB/requirements.txt
-                        '''
-
-                    }
+                    python3 -m venv ai_venv
+                    ai_venv/bin/pip install --upgrade pip
+                    ai_venv/bin/pip install -r $LIB/requirements.txt
+                    '''
                 }
             }
 
             stage('AI Repository Analysis') {
                 steps {
-                    script {
+                    sh '''
+                    LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
-                        sh '''
-                        LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+                    export PYTHONPATH=$LIB
 
-                        export PYTHONPATH=$LIB
-
-                        ai_venv/bin/python $LIB/ai_engine/repo_analyzer.py
-                        '''
-
-                    }
+                    ai_venv/bin/python $LIB/ai_engine/repo_analyzer.py
+                    '''
                 }
             }
 
             stage('AI Pipeline Generation') {
                 steps {
-                    script {
+                    sh '''
+                    LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
-                        sh '''
-                        LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+                    export PYTHONPATH=$LIB
 
-                        export PYTHONPATH=$LIB
-
-                        ai_venv/bin/python $LIB/ai_engine/pipeline_generator.py
-                        '''
-
-                    }
+                    ai_venv/bin/python $LIB/ai_engine/pipeline_generator.py
+                    '''
                 }
             }
 
@@ -93,17 +85,11 @@ def call() {
                     script {
 
                         if (env.APP_TYPE == "python") {
-
-                            sh '''
-                            ai_venv/bin/pip install -r requirements.txt
-                            '''
-
+                            sh 'pip3 install -r requirements.txt'
                         }
 
                         else if (env.APP_TYPE == "java") {
-
                             sh 'mvn clean package'
-
                         }
 
                         else if (env.APP_TYPE == "node") {
@@ -114,13 +100,10 @@ def call() {
                             '''
 
                             echo "Node dependency security scan completed"
-
                         }
 
                         else {
-
                             echo "No supported build file found"
-
                         }
 
                     }
@@ -129,7 +112,6 @@ def call() {
 
             stage('Execute AI Generated Pipeline') {
                 steps {
-
                     sh '''
                     if [ -f generated_pipeline.sh ]; then
                         chmod +x generated_pipeline.sh
@@ -138,7 +120,6 @@ def call() {
                         echo "No generated pipeline found"
                     fi
                     '''
-
                 }
             }
 
@@ -173,7 +154,6 @@ def call() {
                     echo "failure.log not found"
                 fi
                 '''
-
             }
 
         }

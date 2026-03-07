@@ -13,7 +13,9 @@ pipeline {
         stage('Setup Python Environment') {
             steps {
                 sh '''
-                python -m pip install --upgrade pip
+                python3 -m venv venv
+                . venv/bin/activate
+                pip install --upgrade pip
                 pip install -r requirements.txt
                 '''
             }
@@ -21,25 +23,35 @@ pipeline {
 
         stage('Analyze Repository') {
             steps {
-                sh 'python -m ai_engine.repo_analyzer'
+                sh '''
+                . venv/bin/activate
+                python -m ai_engine.repo_analyzer
+                '''
             }
         }
 
         stage('Decide Pipeline Stages') {
             steps {
-                sh 'python -m ai_engine.pipeline_brain'
+                sh '''
+                . venv/bin/activate
+                python -m ai_engine.pipeline_brain
+                '''
             }
         }
 
         stage('Generate CI/CD Pipeline') {
             steps {
-                sh 'python -m ai_engine.pipeline_generator'
+                sh '''
+                . venv/bin/activate
+                python -m ai_engine.pipeline_generator
+                '''
             }
         }
 
         stage('Execute Generated Pipeline') {
             steps {
                 sh '''
+                . venv/bin/activate
                 chmod +x generated_pipeline.sh
                 ./generated_pipeline.sh
                 '''

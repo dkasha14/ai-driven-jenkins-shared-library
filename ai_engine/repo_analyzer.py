@@ -1,75 +1,75 @@
 import os
 import json
 
-from llm_client import ask_llm
+from ai_engine.llm_client import ask_llm
 
-def scan_repository():
+def analyze_repo(repo_path="."):
 
-    repo_files = []
+    files = []
 
-    for root, dirs, files in os.walk("."):
-        for file in files:
-            path = os.path.join(root, file)
+    for root, dirs, filenames in os.walk(repo_path):
 
-            # ignore git and venv noise
-            if ".git" in path or ".venv" in path:
-                continue
+        # ignore unnecessary folders
+        dirs[:] = [d for d in dirs if d not in ['.git', '__pycache__', '.venv', 'venv']]
 
-            repo_files.append(path)
+        for name in filenames:
 
-    return repo_files
+            # only important project files
+            if name.endswith(('.py', '.groovy', '.java', '.js', '.yaml', '.yml', '.tf', '.json')):
+                files.append(os.path.join(root, name))
 
+                # stop scanning after 50 files
+                if len(files) >= 50:
+                    break
 
-def analyze_with_llm(files):
-
-    file_list = "\n".join(files)
+        # break outer loop also if limit reached
+        if len(files) >= 50:
+            break
 
     prompt = f"""
-You are an AI DevOps system.
+Analyze the following repository files and determine:
 
-Analyze the following repository structure and determine:
+Language
+Framework
+Build tool
+Test tool
+Deployment
 
-1. programming language
-2. framework
-3. build tool
-4. test framework
-5. deployment type (docker/kubernetes/none)
+Files:
+{files}
 
-Return ONLY JSON like this:
-
-{{
- "language": "",
- "framework": "",
- "build_tool": "",
- "test_tool": "",
- "deployment": ""
-}}
-
-Repository files:
-
-{file_list}
+Return JSON only.
 """
 
     response = ask_llm(prompt)
 
-    return response
+    # clean markdown if LLM returns it
+    response = response.replace("```json", "").replace("```", "").strip()
 
+    try:
+        analysis = json.loads(response)
+    except Exception as e:
+        print("LLM JSON parse failed:", e)
+        print("LLM response was:", response)
 
-def save_analysis(data):
+        analysis = {
+            "language": "unknown",
+            "framework": "unknown",
+            "build_tool": "unknown",
+            "test_tool": "unknown",
+            "deployment": "unknown"
+        }
 
     with open("analysis.json", "w") as f:
-        f.write(data)
+        json.dump(analysis, f, indent=2)
+
+    return analysis
 
 
 if __name__ == "__main__":
 
     print("Running AI repository analysis...")
 
-    files = scan_repository()
+    result = analyze_repo()
 
-    ai_result = analyze_with_llm(files)
-
-    save_analysis(ai_result)
-
-    print("AI analysis completed.")
-    print(ai_result)
+    print(result)

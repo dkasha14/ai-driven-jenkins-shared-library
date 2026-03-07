@@ -1,0 +1,3 @@
+@Library('ai-driven-jenkins-shared-library') _
+
+aiPipeline()

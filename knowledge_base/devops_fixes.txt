@@ -1,0 +1,17 @@
+Docker command not found
+Fix:
+Install Docker using:
+sudo apt install docker.io
+
+Kubernetes command not found
+Fix:
+Install kubectl:
+sudo apt install kubectl
+
+Python dependency error
+Fix:
+pip install -r requirements.txt
+
+Sonar scanner not found
+Fix:
+Install sonar-scanner and add to PATH

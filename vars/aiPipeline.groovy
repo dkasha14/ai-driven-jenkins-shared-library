@@ -6,31 +6,34 @@ def call() {
 
         stages {
 
-            stage('Checkout Repository') {
+            stage('Checkout') {
                 steps {
-                    echo "Checking out source code"
                     checkout scm
                 }
             }
 
             stage('AI Repository Analysis') {
                 steps {
-                    echo "Running AI repository analyzer"
-                    sh '.venv/bin/python ai_engine/repo_analyzer.py'
+                    sh '''
+                    python ai_engine/repo_analyzer.py
+                    '''
                 }
             }
 
-            stage('Generate Pipeline Plan') {
+            stage('AI Pipeline Generation') {
                 steps {
-                    echo "Generating pipeline plan using AI"
-                    sh '.venv/bin/python ai_engine/pipeline_generator.py'
+                    sh '''
+                    python -m ai_engine.pipeline_generator
+                    '''
                 }
             }
 
             stage('Execute Generated Pipeline') {
                 steps {
-                    echo "Executing generated pipeline steps"
-                    sh 'bash generated_pipeline.sh'
+                    sh '''
+                    chmod +x generated_pipeline.sh
+                    ./generated_pipeline.sh
+                    '''
                 }
             }
 

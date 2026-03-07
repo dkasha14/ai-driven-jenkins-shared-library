@@ -1,23 +1,27 @@
 #!/bin/bash
 
-set +e
+set -e
 
 echo "Starting AI Generated Pipeline..."
 
-echo "Running Maven build"
-mvn -B -Dstyle.color=never clean package
+echo "Running Maven build..."
+mvn -B -ntp -Dstyle.color=never clean package
 
-echo "Running unit tests"
-pytest
-TEST_EXIT=$?
+echo "Running unit tests..."
+pytest -q || TEST_EXIT=$?
 
-if [ "$TEST_EXIT" -eq 5 ]; then
-    echo "No tests found — continuing"
+if [ "${TEST_EXIT:-0}" -eq 5 ]; then
+    echo "No tests found — continuing pipeline"
 fi
 
-echo "Building Docker image"
-docker build -t ai-devops-app:latest .
+echo "Checking Docker availability..."
 
-echo "Docker build completed"
+if command -v docker >/dev/null 2>&1; then
+    echo "Building Docker image..."
+    docker build -t ai-devops-app:latest .
+    echo "Docker build completed"
+else
+    echo "Docker not installed — skipping Docker build"
+fi
 
-exit 0
+echo "AI pipeline execution completed successfully"

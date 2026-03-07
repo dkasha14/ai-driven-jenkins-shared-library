@@ -1,0 +1,9 @@
+```json
+{
+ "language": "Python/Groovy",
+ "framework": "None/Custom/ Jenkins",
+ "build_tool": "None",
+ "test_tool": "unittest (inferred from test_llm.py)",
+ "deployment": "none"
+}
+```

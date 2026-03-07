@@ -1,61 +1,24 @@
 /*
--------------------------------------------------------------
-AI DRIVEN JENKINS SHARED LIBRARY PIPELINE
--------------------------------------------------------------
-
-This pipeline performs the following high level workflow:
-
-1. Clone the application repository
-2. Detect application type automatically
-3. Install AI engine dependencies
-4. Run AI repository analysis
-5. Generate CI/CD pipeline using LLM
-6. Build the application
-7. Execute the AI generated pipeline
-8. Handle failures using AI log analysis
-
--------------------------------------------------------------
+AI-Driven Jenkins Shared Library Pipeline that analyzes repositories, generates CI/CD pipelines using AI, and executes them automatically.
 */
 
 def call() {
 
     pipeline {
 
-        /* 
-        -----------------------------------------------------
-        Run pipeline on any available Jenkins agent
-        -----------------------------------------------------
-        */
+        // Run the pipeline on any available Jenkins build agent
         agent any
 
         stages {
 
-            /*
-            -----------------------------------------------------
-            Stage 1 : Checkout Application Source Code
-            -----------------------------------------------------
-            This stage clones the target repository that the AI
-            system will analyze and build.
-            -----------------------------------------------------
-            */
+            // Clone the target application repository that will be analyzed and built
             stage('Checkout') {
                 steps {
                     git url: 'https://github.com/dkasha14/JavaSpringBoot.git', branch: 'master'
                 }
             }
 
-            /*
-            -----------------------------------------------------
-            Stage 2 : Detect Application Type Automatically
-            -----------------------------------------------------
-            The pipeline checks for common build files to detect
-            the programming language and ecosystem.
-
-            Python  -> requirements.txt
-            Java    -> pom.xml
-            NodeJS  -> package.json
-            -----------------------------------------------------
-            */
+            // Detect the application technology stack by checking common build files
             stage('Detect Application Type') {
                 steps {
                     script {
@@ -78,58 +41,20 @@ def call() {
                 }
             }
 
-            /*
-            -----------------------------------------------------
-            Stage 3 : Install AI Engine Dependencies
-            -----------------------------------------------------
-            The AI engine requires Python dependencies such as:
-
-            - Groq SDK
-            - LangChain
-            - LangGraph
-            - Requests
-            - Python dotenv
-
-            A virtual environment is created to avoid conflicts
-            with system Python (PEP 668 restriction).
-            -----------------------------------------------------
-            */
+            // Create Python virtual environment and install AI engine dependencies required for repository analysis
             stage('Install AI Dependencies') {
                 steps {
                     sh '''
-                    # Locate the shared library directory inside Jenkins workspace
                     LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
-                    # Create isolated Python environment
                     python3 -m venv ai_venv
-
-                    # Upgrade pip inside the virtual environment
                     ai_venv/bin/pip install --upgrade pip
-
-                    # Install required AI dependencies
                     ai_venv/bin/pip install -r $LIB/requirements.txt
                     '''
                 }
             }
 
-            /*
-            -----------------------------------------------------
-            Stage 4 : AI Repository Analysis
-            -----------------------------------------------------
-            This stage runs the AI analyzer which scans the
-            repository to detect:
-
-            - programming language
-            - frameworks
-            - docker usage
-            - terraform usage
-            - kubernetes usage
-            - CI/CD requirements
-
-            Groq LLM API key is securely injected from Jenkins
-            credentials.
-            -----------------------------------------------------
-            */
+            // Run the AI repository analyzer to detect languages, frameworks, and infrastructure components
             stage('AI Repository Analysis') {
                 steps {
 
@@ -138,10 +63,8 @@ def call() {
                         sh '''
                         LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
-                        # Allow Python to locate shared library modules
                         export PYTHONPATH=$LIB
 
-                        # Run repository analyzer
                         ai_venv/bin/python $LIB/ai_engine/repo_analyzer.py
                         '''
 
@@ -149,18 +72,7 @@ def call() {
                 }
             }
 
-            /*
-            -----------------------------------------------------
-            Stage 5 : AI Pipeline Generation
-            -----------------------------------------------------
-            The AI engine sends repository metadata to the LLM
-            and dynamically generates a CI/CD pipeline script.
-
-            Output file generated:
-
-            generated_pipeline.sh
-            -----------------------------------------------------
-            */
+            // Generate a dynamic CI/CD pipeline script using the LLM based on repository analysis results
             stage('AI Pipeline Generation') {
                 steps {
 
@@ -171,7 +83,6 @@ def call() {
 
                         export PYTHONPATH=$LIB
 
-                        # Generate CI/CD pipeline using AI
                         ai_venv/bin/python $LIB/ai_engine/pipeline_generator.py
                         '''
 
@@ -179,18 +90,7 @@ def call() {
                 }
             }
 
-            /*
-            -----------------------------------------------------
-            Stage 6 : Build Application
-            -----------------------------------------------------
-            Based on detected application type, the correct
-            build command is executed.
-
-            Python -> pip install dependencies
-            Java   -> Maven build
-            Node   -> npm install + security audit
-            -----------------------------------------------------
-            */
+            // Build the application using the appropriate build tool depending on detected project type
             stage('Build') {
                 steps {
 
@@ -224,30 +124,17 @@ def call() {
                 }
             }
 
-            /*
-            -----------------------------------------------------
-            Stage 7 : Execute AI Generated Pipeline
-            -----------------------------------------------------
-            The generated script may include additional DevOps
-            steps such as:
-
-            - Docker build
-            - Docker push
-            - Kubernetes deployment
-            - Security scanning
-
-            The virtual environment PATH is injected to prevent
-            PEP 668 Python installation issues.
-            -----------------------------------------------------
-            */
+            // Execute the AI-generated CI/CD pipeline while ensuring required test tools are available
             stage('Execute AI Generated Pipeline') {
                 steps {
                     sh '''
+
+                    pip install pytest bandit || true
+
                     if [ -f generated_pipeline.sh ]; then
 
                         chmod +x generated_pipeline.sh
 
-                        # Ensure generated script uses the virtual environment Python
                         export PATH=$WORKSPACE/ai_venv/bin:$PATH
 
                         ./generated_pipeline.sh
@@ -259,31 +146,14 @@ def call() {
                 }
             }
 
-            /*
-            -----------------------------------------------------
-            Stage 8 : Test Stage
-            -----------------------------------------------------
-            Placeholder stage where test execution could be added
-            depending on project type.
-            -----------------------------------------------------
-            */
+            // Placeholder stage where project specific automated tests can be executed
             stage('Test') {
                 steps {
                     echo "Running tests..."
                 }
             }
 
-            /*
-            -----------------------------------------------------
-            Stage 9 : Deployment Stage
-            -----------------------------------------------------
-            This stage would typically perform:
-
-            - Kubernetes deployment
-            - Helm release
-            - Infrastructure provisioning
-            -----------------------------------------------------
-            */
+            // Placeholder stage for deployment actions such as Kubernetes or infrastructure provisioning
             stage('Deploy') {
                 steps {
                     echo "Deploy stage..."
@@ -292,21 +162,7 @@ def call() {
 
         }
 
-        /*
-        -----------------------------------------------------
-        Post Actions : AI Failure Analysis
-        -----------------------------------------------------
-
-        If the pipeline fails, the AI log analyzer will attempt
-        to detect root cause and suggest fixes automatically.
-
-        Input:
-        failure.log
-
-        Output:
-        Root cause + recommended solution
-        -----------------------------------------------------
-        */
+        // Run AI log analysis after pipeline failure to help diagnose root cause automatically
         post {
 
             failure {

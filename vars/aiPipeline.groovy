@@ -4,17 +4,7 @@ def call() {
 
         agent any
 
-        environment {
-            GROQ_API_KEY = credentials('groq-api-key')
-        }
-
         stages {
-
-            stage('Check Env') {
-                steps {
-                    sh 'echo GROQ key environment loaded'
-                }
-            }
 
             stage('Checkout') {
                 steps {
@@ -58,25 +48,33 @@ def call() {
 
             stage('AI Repository Analysis') {
                 steps {
-                    sh '''
-                    LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+                    withCredentials([string(credentialsId: 'groq-api-key', variable: 'GROQ_API_KEY')]) {
 
-                    export PYTHONPATH=$LIB
+                        sh '''
+                        LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
-                    ai_venv/bin/python $LIB/ai_engine/repo_analyzer.py
-                    '''
+                        export PYTHONPATH=$LIB
+
+                        ai_venv/bin/python $LIB/ai_engine/repo_analyzer.py
+                        '''
+
+                    }
                 }
             }
 
             stage('AI Pipeline Generation') {
                 steps {
-                    sh '''
-                    LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+                    withCredentials([string(credentialsId: 'groq-api-key', variable: 'GROQ_API_KEY')]) {
 
-                    export PYTHONPATH=$LIB
+                        sh '''
+                        LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
-                    ai_venv/bin/python $LIB/ai_engine/pipeline_generator.py
-                    '''
+                        export PYTHONPATH=$LIB
+
+                        ai_venv/bin/python $LIB/ai_engine/pipeline_generator.py
+                        '''
+
+                    }
                 }
             }
 
@@ -143,17 +141,22 @@ def call() {
 
                 echo "Pipeline failed. Running AI failure analysis."
 
-                sh '''
-                LIB=$(ls -d $WORKSPACE@libs/* | head -1)
+                withCredentials([string(credentialsId: 'groq-api-key', variable: 'GROQ_API_KEY')]) {
 
-                export PYTHONPATH=$LIB
+                    sh '''
+                    LIB=$(ls -d $WORKSPACE@libs/* | head -1)
 
-                if [ -f failure.log ]; then
-                    ai_venv/bin/python $LIB/ai_engine/log_analyzer.py failure.log
-                else
-                    echo "failure.log not found"
-                fi
-                '''
+                    export PYTHONPATH=$LIB
+
+                    if [ -f failure.log ]; then
+                        ai_venv/bin/python $LIB/ai_engine/log_analyzer.py failure.log
+                    else
+                        echo "failure.log not found"
+                    fi
+                    '''
+
+                }
+
             }
 
         }

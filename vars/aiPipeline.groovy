@@ -52,8 +52,8 @@ def call() {
 
                         else if (env.APP_TYPE == "node") {
                             sh '''
-                            npm install
-                            npm audit --audit-level=high || true
+                            npm install --silent
+                            npm audit --audit-level=high --json > audit-report.json || true
                             '''
                             echo "Node dependency security scan completed"
                         }

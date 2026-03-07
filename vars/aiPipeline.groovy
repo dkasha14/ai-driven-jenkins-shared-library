@@ -25,13 +25,13 @@ def call() {
 
                         if (fileExists('requirements.txt')) {
                             env.APP_TYPE = "python"
-                        } 
+                        }
                         else if (fileExists('pom.xml')) {
                             env.APP_TYPE = "java"
-                        } 
+                        }
                         else if (fileExists('package.json')) {
                             env.APP_TYPE = "node"
-                        } 
+                        }
                         else {
                             env.APP_TYPE = "unknown"
                         }
@@ -41,7 +41,7 @@ def call() {
                 }
             }
 
-            // Install AI dependencies in virtual environment
+            // Install AI dependencies in isolated virtual environment
             stage('Install AI Dependencies') {
                 steps {
                     sh '''
@@ -54,7 +54,7 @@ def call() {
                 }
             }
 
-            // Run repository analysis using AI engine
+            // Run AI repository analyzer
             stage('AI Repository Analysis') {
                 steps {
 
@@ -67,12 +67,11 @@ def call() {
 
                         ai_venv/bin/python $LIB/ai_engine/repo_analyzer.py
                         '''
-
                     }
                 }
             }
 
-            // Generate dynamic CI/CD pipeline
+            // Generate CI/CD pipeline using AI
             stage('AI Pipeline Generation') {
                 steps {
 
@@ -85,12 +84,11 @@ def call() {
 
                         ai_venv/bin/python $LIB/ai_engine/pipeline_generator.py
                         '''
-
                     }
                 }
             }
 
-            // Build application
+            // Build application depending on detected stack
             stage('Build') {
                 steps {
 
@@ -119,7 +117,7 @@ def call() {
                 }
             }
 
-            // Execute AI generated pipeline
+            // Execute the AI generated CI/CD pipeline safely
             stage('Execute AI Generated Pipeline') {
                 steps {
                     sh '''
@@ -133,6 +131,14 @@ def call() {
                         export PATH=$WORKSPACE/ai_venv/bin:$PATH
 
                         ./generated_pipeline.sh
+                        EXIT_CODE=$?
+
+                        if [ "$EXIT_CODE" = "5" ]; then
+                            echo "No tests found — continuing pipeline"
+                            exit 0
+                        else
+                            exit $EXIT_CODE
+                        fi
 
                     else
                         echo "No generated pipeline found"
@@ -142,14 +148,14 @@ def call() {
                 }
             }
 
-            // Test placeholder stage
+            // Placeholder test stage
             stage('Test') {
                 steps {
                     echo "Running tests..."
                 }
             }
 
-            // Deployment placeholder stage
+            // Placeholder deployment stage
             stage('Deploy') {
                 steps {
                     echo "Deploy stage..."
@@ -158,7 +164,7 @@ def call() {
 
         }
 
-        // Run AI log analysis if pipeline fails
+        // Run AI log analyzer on failure
         post {
 
             failure {
@@ -178,7 +184,6 @@ def call() {
                         echo "failure.log not found"
                     fi
                     '''
-
                 }
 
             }

@@ -1,27 +1,40 @@
 import os
 
+KB_PATH = "knowledge_base/devops_fixes.txt"
 
-def search_knowledge(query):
 
-    kb_file = "knowledge_base/devops_fixes.txt"
+def load_knowledge():
 
-    if not os.path.exists(kb_file):
-        return "No knowledge base found."
+    if not os.path.exists(KB_PATH):
+        return ""
 
-    with open(kb_file) as f:
-        data = f.read()
+    with open(KB_PATH, "r") as f:
+        return f.read()
 
-    if query.lower() in data.lower():
-        return data
 
-    return "No known fix found in knowledge base."
+def search_knowledge(query: str):
+
+    knowledge = load_knowledge()
+
+    if not knowledge:
+        return "Knowledge base not available."
+
+    sections = knowledge.strip().split("\n\n")
+
+    query = query.lower()
+
+    for section in sections:
+        if query in section.lower():
+            return section.strip()
+
+    return "No relevant fix found in knowledge base."
 
 
 if __name__ == "__main__":
 
-    query = "docker command not found"
+    test_query = "docker command not found"
 
-    result = search_knowledge(query)
+    result = search_knowledge(test_query)
 
-    print("Knowledge Base Result:\n")
+    print("\n=== Knowledge Base Result ===\n")
     print(result)

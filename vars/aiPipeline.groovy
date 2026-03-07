@@ -8,7 +8,8 @@ def call() {
 
             stage('Checkout') {
                 steps {
-                    git url: 'https://github.com/dkasha14/JavaSpringBoot.git', branch: 'master'
+                    // git url: 'https://github.com/dkasha14/JavaSpringBoot.git', branch: 'master'
+                    git url: 'https://github.com/dkasha14/nodeJsApplication.git', branch: 'master'
                 }
             }
 

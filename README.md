@@ -86,15 +86,20 @@ ai-driven-jenkins-shared-library
 │   └── PipelineOrchestrator.groovy
 │
 ├── examples
-│   └── Jenkinsfile
+│   ├── Jenkinsfile
+│   │
+│   └── pipeline_logs
+│       ├── java_pipeline_execution.txt
+│       └── node_pipeline_execution.txt
 │
 ├── tests
 │   └── test_llm.py
 │
 ├── requirements.txt
-├── generated_pipeline.sh
-├── analysis.json
-└── failure.log
+│
+├── generated_pipeline.sh      # dynamically generated pipeline script
+├── analysis.json              # repository analysis output
+└── failure.log                # pipeline failure logs used for AI analysis
 ```
 
 ---
@@ -308,6 +313,18 @@ https://github.com/dkasha14/ai-driven-jenkins-shared-library.git
 @Library('ai-driven-jenkins-shared-library') _
 aiPipeline()
 ```
+
+Example Pipeline Logs
+
+Example Jenkins pipeline executions are stored in:
+examples/pipeline_logs/
+Files included:
+
+java_pipeline_execution.txt → Example run for a Java Spring Boot application
+
+node_pipeline_execution.txt → Example run for a Node.js application
+
+These logs show how the AI-driven shared library automatically detects repository type and runs the appropriate pipeline steps.
 
 ---
 

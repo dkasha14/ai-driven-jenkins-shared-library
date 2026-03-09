@@ -1,0 +1,92 @@
+Started by user Admin
+Loading library ai-driven-jenkins-shared-library@master
+Attempting to resolve master from remote references...
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git ls-remote -h -- https://github.com/dkasha14/ai-driven-jenkins-shared-library.git # timeout=10
+Found match: refs/heads/master revision aedde8e42e569e6b7ef9a37bafb0d9de34b889bd
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/ai-devops-agent-new@libs/1078bf0320e2bbee7fc59ba2a738cfc092f894c4cacf3c042edfbdc5cbce7275/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/dkasha14/ai-driven-jenkins-shared-library.git # timeout=10
+Fetching without tags
+Fetching upstream changes from https://github.com/dkasha14/ai-driven-jenkins-shared-library.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --no-tags --force --progress -- https://github.com/dkasha14/ai-driven-jenkins-shared-library.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+Checking out Revision aedde8e42e569e6b7ef9a37bafb0d9de34b889bd (master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f aedde8e42e569e6b7ef9a37bafb0d9de34b889bd # timeout=10
+Commit message: "Switch pipeline test repository to Node.js application"
+ > git rev-list --no-walk 469324071740d68c81d6f798137ef3d7ae5052cd # timeout=10
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/ai-devops-agent-new
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout)
+[Pipeline] git
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/ai-devops-agent-new/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/dkasha14/nodeJsApplication.git # timeout=10
+Fetching upstream changes from https://github.com/dkasha14/nodeJsApplication.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --tags --force --progress -- https://github.com/dkasha14/nodeJsApplication.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/master^{commit} # timeout=10
+Checking out Revision e65bfa9ba5cfd67419cbbc5f25a7be4c668c96a4 (refs/remotes/origin/master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f e65bfa9ba5cfd67419cbbc5f25a7be4c668c96a4 # timeout=10
+ > git branch -a -v --no-abbrev # timeout=10
+ > git branch -D master # timeout=10
+ > git checkout -b master e65bfa9ba5cfd67419cbbc5f25a7be4c668c96a4 # timeout=10
+Commit message: "Merge pull request #2 from dkasha14/ai-onboard-changes-20260204132315"
+ > git rev-list --no-walk e65bfa9ba5cfd67419cbbc5f25a7be4c668c96a4 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Detect Application Type)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] fileExists
+[Pipeline] fileExists
+[Pipeline] fileExists
+[Pipeline] echo
+Detected application type: node
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Build)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ npm install --silent
++ npm audit --audit-level=high --json
++ true
+[Pipeline] echo
+Node dependency security scan completed
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Test)
+[Pipeline] echo
+Running tests...
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy)
+[Pipeline] echo
+Deploy stage...
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS

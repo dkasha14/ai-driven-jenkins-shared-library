@@ -1,0 +1,128 @@
+Started by user Admin
+Loading library ai-driven-jenkins-shared-library@master
+Attempting to resolve master from remote references...
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git ls-remote -h -- https://github.com/dkasha14/ai-driven-jenkins-shared-library.git # timeout=10
+Found match: refs/heads/master revision 2f808ae5aa774f9bbf44191e7a04f08b038f03ae
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/ai-devops-agent-new@libs/1078bf0320e2bbee7fc59ba2a738cfc092f894c4cacf3c042edfbdc5cbce7275/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/dkasha14/ai-driven-jenkins-shared-library.git # timeout=10
+Fetching without tags
+Fetching upstream changes from https://github.com/dkasha14/ai-driven-jenkins-shared-library.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --no-tags --force --progress -- https://github.com/dkasha14/ai-driven-jenkins-shared-library.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+Checking out Revision 2f808ae5aa774f9bbf44191e7a04f08b038f03ae (master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 2f808ae5aa774f9bbf44191e7a04f08b038f03ae # timeout=10
+Commit message: "Switch pipeline test repository to Node.js application"
+ > git rev-list --no-walk aedde8e42e569e6b7ef9a37bafb0d9de34b889bd # timeout=10
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/ai-devops-agent-new
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout)
+[Pipeline] git
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/ai-devops-agent-new/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/dkasha14/JavaSpringBoot.git # timeout=10
+Fetching upstream changes from https://github.com/dkasha14/JavaSpringBoot.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --tags --force --progress -- https://github.com/dkasha14/JavaSpringBoot.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/master^{commit} # timeout=10
+Checking out Revision 1a9ed7fa6ab82eee71172aecb01dc2cf30d8f32c (refs/remotes/origin/master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 1a9ed7fa6ab82eee71172aecb01dc2cf30d8f32c # timeout=10
+ > git branch -a -v --no-abbrev # timeout=10
+ > git branch -D master # timeout=10
+ > git checkout -b master 1a9ed7fa6ab82eee71172aecb01dc2cf30d8f32c # timeout=10
+Commit message: "Merge pull request #3 from dkasha14/ai-onboard-changes-20260204161617"
+ > git rev-list --no-walk 1a9ed7fa6ab82eee71172aecb01dc2cf30d8f32c # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Detect Application Type)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] fileExists
+[Pipeline] fileExists
+[Pipeline] echo
+Detected application type: java
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Build)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ mvn clean package
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m-------------------< [0;36mcom.mkyong:docker-spring-boot[0;1m >--------------------[m
+[[1;34mINFO[m] [1mBuilding docker-spring-boot 1.2.9[m
+[[1;34mINFO[m]   from pom.xml
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;33mWARNING[m] 1 problem was encountered while building the effective model for org.javassist:javassist:jar:3.20.0-GA during dependency collection step for project (use -X to see details)
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mclean:3.1.0:clean[m [1m(default-clean)[m @ [36mdocker-spring-boot[0;1m ---[m
+[[1;34mINFO[m] Deleting /var/jenkins_home/workspace/ai-devops-agent-new/target
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mresources:3.1.0:resources[m [1m(default-resources)[m @ [36mdocker-spring-boot[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] Copying 1 resource
+[[1;34mINFO[m] Copying 2 resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mcompiler:3.8.0:compile[m [1m(default-compile)[m @ [36mdocker-spring-boot[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module!
+[[1;34mINFO[m] Compiling 1 source file to /var/jenkins_home/workspace/ai-devops-agent-new/target/classes
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mresources:3.1.0:testResources[m [1m(default-testResources)[m @ [36mdocker-spring-boot[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /var/jenkins_home/workspace/ai-devops-agent-new/src/test/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mcompiler:3.8.0:testCompile[m [1m(default-testCompile)[m @ [36mdocker-spring-boot[0;1m ---[m
+[[1;34mINFO[m] No sources to compile
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32msurefire:2.22.2:test[m [1m(default-test)[m @ [36mdocker-spring-boot[0;1m ---[m
+[[1;34mINFO[m] No tests to run.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mjar:3.1.2:jar[m [1m(default-jar)[m @ [36mdocker-spring-boot[0;1m ---[m
+[[1;34mINFO[m] Building jar: /var/jenkins_home/workspace/ai-devops-agent-new/target/spring-boot-web.jar
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mspring-boot:2.2.4.RELEASE:repackage[m [1m(repackage)[m @ [36mdocker-spring-boot[0;1m ---[m
+[[1;34mINFO[m] Replacing main artifact with repackaged archive
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;32mBUILD SUCCESS[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  2.919 s
+[[1;34mINFO[m] Finished at: 2026-03-07T11:32:31Z
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Test)
+[Pipeline] echo
+Running tests...
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy)
+[Pipeline] echo
+Deploy stage...
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS

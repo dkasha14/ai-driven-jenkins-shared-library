@@ -3,3 +3,6 @@
 .venv/
 venv/
 ai_venv/
+__pycache__/
+ai_engine/__pycache__/
+tests/__pycache__/
